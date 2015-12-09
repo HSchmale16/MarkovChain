@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <array>
 #include "tree.hh"
 
 // size of the training set in words
@@ -69,6 +70,10 @@ void trainMarkovChain(tree<letter>& tr, std::string& word){
             loc->count++;
         }
     }
+}
+
+void generateFromMarkovChain(tree<letter>& tr){
+
 }
 
 /**************************************
