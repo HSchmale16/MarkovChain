@@ -7,7 +7,8 @@
 
 int gWordTrainingSetSize = 0;
 
-struct letter {
+class letter {
+public:
     uint64_t l : 8; // the letter
     uint64_t count : 56;
 
@@ -23,6 +24,10 @@ struct letter {
 
     bool operator==(char c){
         return this->l == c;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, letter& l){
+        out << l.l << l.count;
     }
 };
 
