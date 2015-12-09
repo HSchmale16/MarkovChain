@@ -4,11 +4,12 @@
 #include <fstream>
 #include <algorithm>
 #include "tree.hh"
-//#include "tree_util.hh"
+
+int gWordTrainingSetSize = 0;
 
 struct letter {
-    uint32_t l : 8; // the letter
-    uint32_t count : 24;
+    uint64_t l : 8; // the letter
+    uint64_t count : 56;
 
     letter(){
         l = 0;
@@ -19,26 +20,16 @@ struct letter {
         l = c;
         count = 0;
     }
+
+    bool operator==(char c){
+        return this->l == c;
+    }
 };
 
-void initMarkovTreeNode(tree<letter>& tr,
-        tree<letter>::iterator& it, int depth){
-    for(char c = 'A'; c <= 'Z'; c++){
-        tr.append_child(it, letter(c));
-        if(depth > 0){
-            initMarkovTreeNode(tr, it, depth - 1);
-        }
-    }
-}
-
-void initMarkovTree(tree<letter>& tr, int depth){
-    for(char c = 'A'; c <= 'Z'; c++){
-        tree<letter>::iterator node = tr.insert(tr.begin(), letter(c));
-        if(depth > 0){
-            initMarkovTreeNode(tr, node, depth - 1);
-            std::cout << c << std::endl;
-        }
-    }
+void printTreeStats(const tree<letter>& tr){
+    std::cerr << "Max Depth: " << tr.max_depth() << std::endl;
+    std::cerr << "Nodes: " << tr.size() << std::endl;
+    std::cerr << "Training Set Size: " << gWordTrainingSetSize << std::endl;
 }
 
 int main(int argc, char** argv){
@@ -47,10 +38,27 @@ int main(int argc, char** argv){
         std::cout << "Failed to open training data" << std::endl;
         return 0;
     }
-    // build markov chain for words
+
     tree<letter> tr;
+    tree<letter>::iterator treeTop = tr.insert(tr.begin(), letter(0));
     std::string word;
-    initMarkovTree(tr, 10);
     while(infile >> word){
+        gWordTrainingSetSize++;
+        tree<letter>::iterator treeIt = treeTop, loc;
+        for(int i = 0; i < word.length(); i++){
+            tree<letter>::sibling_iterator b = treeIt.begin(), e = treeIt.end();
+            loc = std::find(b, e, word[i]);
+            if(loc == treeIt.end()){
+                // insert new node
+                loc = tr.append_child(treeIt, letter(word[i]));
+                loc->count++;
+                treeIt = loc;
+                continue;
+            }else{
+                // increment times found count for that letter in position
+                loc->count++;
+            }
+        }
     }
+    printTreeStats(tr);
 }

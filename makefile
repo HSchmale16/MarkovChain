@@ -9,7 +9,7 @@ clean:
 	rm -f $(PROCDDATAFILE)
 
 $(EXE): main.cpp
-	g++ -std=c++11 $< -o $@
+	g++ -g -std=c++11 $< -o $@
 
 $(PROCDDATAFILE): $(INPUTDATA)
 	$(DATAPREPROCESSOR) $^ > $@
