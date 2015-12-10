@@ -8,6 +8,8 @@
 
 cat $@ | \
     sed -e '/^#/ d' | \
-    tr 'a-z-' 'A-Z ' | tr -cd 'A-Z \n' | \
-    sed -e 's/ /\n/g' | sed -e '/^$/d' | \
+    tr 'a-z-' 'A-Z ' | \
+    tr -cd 'a-zA-Z \n' | \
+    sed -e 's/ /\n/g' | \
+    sed -e '/^$/d' | \
     sort
