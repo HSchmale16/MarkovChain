@@ -3,3 +3,14 @@ data2.txt filter=lfs diff=lfs merge=lfs -text
 data3.txt filter=lfs diff=lfs merge=lfs -text
 data4.txt filter=lfs diff=lfs merge=lfs -text
 data/data5.txt filter=lfs diff=lfs merge=lfs -text
+data/data10.txt filter=lfs diff=lfs merge=lfs -text
+data/data11.txt filter=lfs diff=lfs merge=lfs -text
+data/data12.txt filter=lfs diff=lfs merge=lfs -text
+data/data2.txt filter=lfs diff=lfs merge=lfs -text
+data/data3.txt filter=lfs diff=lfs merge=lfs -text
+data/data4.txt filter=lfs diff=lfs merge=lfs -text
+data/data6.txt filter=lfs diff=lfs merge=lfs -text
+data/data7.txt filter=lfs diff=lfs merge=lfs -text
+data/data8.txt filter=lfs diff=lfs merge=lfs -text
+data/data9.txt filter=lfs diff=lfs merge=lfs -text
+data/data.txt filter=lfs diff=lfs merge=lfs -text

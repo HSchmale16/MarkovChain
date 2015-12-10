@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <chrono>
 #include <random>
 #include <string>
@@ -133,8 +134,9 @@ int main(int argc, char** argv){
     std::string word;
     while(infile >> word){
         trainMarkovChain(tr, word);
+        usleep(1);
     }
-    printTree(tr);
+    //printTree(tr);
     printTreeStats(tr);
     std::cout << generateFromMarkovChain(tr) << std::endl;
 }
