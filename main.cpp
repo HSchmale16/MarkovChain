@@ -134,9 +134,10 @@ int main(int argc, char** argv){
     std::string word;
     while(infile >> word){
         trainMarkovChain(tr, word);
-        usleep(1);
     }
     //printTree(tr);
     printTreeStats(tr);
-    std::cout << generateFromMarkovChain(tr) << std::endl;
+    for(int i = 0; i < 100; i++){
+        std::cout << generateFromMarkovChain(tr) << std::endl;
+    }
 }
