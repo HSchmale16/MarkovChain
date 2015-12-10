@@ -38,6 +38,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, letter& l){
         out << (char)l.l << "-" << l.count;
+        return out;
     }
 };
 
@@ -54,7 +55,7 @@ void printTree(const tree<letter>& tr){
         end = tr.end();
     while(sib != end){
         for(int i = 0; i < tr.depth(sib); ++i){
-            std::cout << "  ";
+            std::cout << "    ";
         }
         std::cout << (*sib) << std::endl;
         ++sib;
@@ -72,11 +73,11 @@ void trainMarkovChain(tree<letter>& tr, std::string& word){
             loc = tr.append_child(treeIt, letter(word[i]));
             loc->count++;
             treeIt = loc;
-            continue;
         }else{
             // increment times found count for that letter in position
             loc->count++;
         }
+        treeIt = loc;
     }
 }
 
@@ -105,9 +106,10 @@ std::string generateFromMarkovChain(tree<letter>& tr){
         str += (char)(idx + 'A');
         treeTop = std::find(beg, end, letter(idx + 'A', probs[idx]));
         if(treeTop == tr.end()){
+            std::cerr << "Early Exixt because end" << std::endl;
             return str;
         }
-    } while(tr.is_valid(treeTop));
+    } while(tr.max_depth(treeTop));
     return str;
 }
 
@@ -132,7 +134,9 @@ int main(int argc, char** argv){
     while(infile >> word){
         trainMarkovChain(tr, word);
     }
-    // printTree(tr);
+    //printTree(tr);
     printTreeStats(tr);
-    std::cout << generateFromMarkovChain(tr) << std::endl;
+    for(int i = 0; i < 10; i++){
+        std::cout << generateFromMarkovChain(tr) << std::endl;
+    }
 }

@@ -6,4 +6,8 @@
 # USAGE
 # ./preprocess.sh <SOURCE_DATA_FILES>
 
-cat $@ | sed '/^#/ d' | tr 'a-z-' 'A-Z ' | tr -cd 'A-Z \n'
+cat $@ | \
+    sed -e '/^#/ d' | \
+    tr 'a-z-' 'A-Z ' | tr -cd 'A-Z \n' | \
+    sed -e 's/ /\n/g' | sed -e '/^$/d' | \
+    sort
