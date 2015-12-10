@@ -1,3 +1,4 @@
+#include <chrono>
 #include <random>
 #include <string>
 #include <iostream>
@@ -11,8 +12,8 @@ int gWordTrainingSetSize = 0;
 
 class letter {
 public:
-    uint64_t l : 8; // the letter
-    uint64_t count : 56;
+    uint64_t l : 8;      //!< the letter
+    uint64_t count : 56; //!< times occured
 
     letter(){
         l = 0;
@@ -24,8 +25,15 @@ public:
         count = 0;
     }
 
+    letter(char le, int c)
+        :l(le), count(c) {}
+
     bool operator==(char c){
         return this->l == c;
+    }
+
+    friend bool operator==(letter l1, letter l2){
+        return (l1.l == l2.l) && (l1.count == l2.count);
     }
 
     friend std::ostream& operator<<(std::ostream& out, letter& l){
@@ -56,7 +64,7 @@ void printTree(const tree<letter>& tr){
 void trainMarkovChain(tree<letter>& tr, std::string& word){
     gWordTrainingSetSize++;
     tree<letter>::iterator treeIt = tr.begin(), loc;
-    for(int i = 0; i < word.length(); i++){
+    for(size_t i = 0; i < word.length(); i++){
         tree<letter>::sibling_iterator b = treeIt.begin(), e = treeIt.end();
         loc = std::find(b, e, word[i]);
         if(loc == treeIt.end()){
@@ -72,8 +80,35 @@ void trainMarkovChain(tree<letter>& tr, std::string& word){
     }
 }
 
-void generateFromMarkovChain(tree<letter>& tr){
-
+std::string generateFromMarkovChain(tree<letter>& tr){
+    // generator only used here but needs to maintain state between calls
+    static std::default_random_engine gen =
+        std::default_random_engine(std::chrono::system_clock::now()
+            .time_since_epoch().count()
+        );
+    std::array<int64_t, 26> probs;
+    tree<letter>::iterator treeTop = tr.begin();
+    std::string str;
+    do {
+        tree<letter>::sibling_iterator beg = treeTop.begin(),
+            end = treeTop.end();
+        // get probs
+        int idx = 0;
+        std::fill(probs.begin(), probs.end(), 0);
+        for(auto it = beg; it != end; ++it){
+            probs[it->l - 'A'] = it->count;
+            idx++;
+        }
+        std::discrete_distribution<int> distrib(probs.begin(), probs.end());
+        // pick out the letter
+        idx = distrib(gen);
+        str += (char)(idx + 'A');
+        treeTop = std::find(beg, end, letter(idx + 'A', probs[idx]));
+        if(treeTop == tr.end()){
+            return str;
+        }
+    } while(tr.is_valid(treeTop));
+    return str;
 }
 
 /**************************************
@@ -97,6 +132,7 @@ int main(int argc, char** argv){
     while(infile >> word){
         trainMarkovChain(tr, word);
     }
-    printTree(tr);
+    // printTree(tr);
     printTreeStats(tr);
+    std::cout << generateFromMarkovChain(tr) << std::endl;
 }

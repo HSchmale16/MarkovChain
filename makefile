@@ -1,3 +1,4 @@
+SRC := main.cpp
 EXE := markov
 INPUTDATA := data.txt
 PROCDDATAFILE := preprocd.txt
@@ -8,8 +9,8 @@ clean:
 	rm -f $(EXE)
 	rm -f $(PROCDDATAFILE)
 
-$(EXE): main.cpp
-	g++ -g -std=c++11 $< -o $@
+$(EXE): $(SRC)
+	g++ -W -std=c++11 $^ -o $@
 
 $(PROCDDATAFILE): $(INPUTDATA)
 	$(DATAPREPROCESSOR) $^ > $@
