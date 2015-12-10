@@ -1,6 +1,7 @@
 SRC := main.cpp
 EXE := markov
-INPUTDATA := data.txt
+INPUTDATA := \
+	data/*.txt
 PROCDDATAFILE := preprocd.txt
 DATAPREPROCESSOR := ./preprocess.sh
 

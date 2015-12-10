@@ -136,7 +136,5 @@ int main(int argc, char** argv){
     }
     //printTree(tr);
     printTreeStats(tr);
-    for(int i = 0; i < 10; i++){
-        std::cout << generateFromMarkovChain(tr) << std::endl;
-    }
+    std::cout << generateFromMarkovChain(tr) << std::endl;
 }
