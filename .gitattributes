@@ -14,3 +14,4 @@ data/data7.txt filter=lfs diff=lfs merge=lfs -text
 data/data8.txt filter=lfs diff=lfs merge=lfs -text
 data/data9.txt filter=lfs diff=lfs merge=lfs -text
 data/data.txt filter=lfs diff=lfs merge=lfs -text
+data/aligned.simple filter=lfs diff=lfs merge=lfs -text
