@@ -1,25 +1,44 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 //#include "MarkovLib.hh"
 #include "tree.hh"
 
 class SentenceMarkovChain {
 private:
-    int _trainSetSize; // lines in training set
-    tree<std::string> _tree;
+    struct WordCount {
+        std::string str;
+        uint64_t count;
+
+        WordCount()
+            :count(0) {}
+        WordCount(std::string s)
+            :str(s), count(0) {}
+    };
+
+    uint64_t _trainSetSize; // lines in training set
+    tree<WordCount> _tree;
 public:
     SentenceMarkovChain(){
         _trainSetSize = 0;
+        _tree.insert(_tree.begin(), std::string());
     }
 
-    void train(std::string& sent){
+    void train(const std::string& sent){
         _trainSetSize++;
+        std::stringstream ss(sent);
+        std::string str;
+        while(ss >> str){
+            
+        }
     }
     
     friend std::ostream& operator<<(std::ostream& out,
             const SentenceMarkovChain& c){
         out << "SentencesTrainingSet: " << c._trainSetSize << std::endl;
+        out << "TreeSize: " << c._tree.size() << std::endl;
+        out << "TreeDepth: " << c._tree.max_depth() << std::endl;
         return out;
     }
 };
