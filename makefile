@@ -1,8 +1,8 @@
 SRC := main.cpp
 EXE := markov
-CXX_FLAGS := -Wall -std=c++11
+CXX_FLAGS := -Wall -std=c++11 -O2
 INPUTDATA := \
-	data/*.txt
+	data/*.txt /usr/share/dict/words
 PROCDDATAFILE := preprocd.txt
 DATAPREPROCESSOR := ./preprocess.sh
 

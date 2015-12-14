@@ -117,7 +117,7 @@ public:
         out << "Characters: " << c._wordLengthAcc << std::endl;
         out << "AvgWordLen: " << c._wordLengthAcc / c._trainingSize
             << std::endl;
-        out << "Keys: " << c._map.size() << std::endl;
+        out << "Prob Keys : " << c._map.size() << std::endl;
         return out;
     }
 };
@@ -138,6 +138,7 @@ int main(int argc, char** argv){
     while(infile >> word){
         chain.train(word);
     }
+    infile.close();
     std::cerr << chain << std::endl;
     std::cout << chain.generate() << std::endl;
 }
