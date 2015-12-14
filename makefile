@@ -1,5 +1,6 @@
 SRC := main.cpp
 EXE := markov
+CXX_FLAGS := -Wall -std=c++11
 INPUTDATA := \
 	data/*.txt
 PROCDDATAFILE := preprocd.txt
@@ -11,7 +12,7 @@ clean:
 	rm -f $(PROCDDATAFILE)
 
 $(EXE): $(SRC)
-	g++ -W -std=c++11 $^ -o $@
+	g++ $(CXX_FLAGS) $^ -o $@
 
 $(PROCDDATAFILE): $(INPUTDATA)
 	$(DATAPREPROCESSOR) $^ > $@

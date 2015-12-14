@@ -6,113 +6,121 @@
 #include <fstream>
 #include <algorithm>
 #include <array>
-#include "tree.hh"
+#include <map>
+#include <vector>
+#include <iterator>
 
-// size of the training set in words
-int gWordTrainingSetSize = 0;
+std::default_random_engine gen =
+    std::default_random_engine(std::chrono::system_clock::now()
+        .time_since_epoch().count()
+    );
 
-class letter {
+size_t randomZeroToN(size_t n){
+    std::uniform_int_distribution<size_t> d(0, n);
+    return d(gen);
+}
+
+short twoChar2Short(char c1, char c2){
+    short s = (c1 << 8) | (c2);
+    return s;
+}
+
+class LetterCombo {
 public:
-    uint64_t l : 8;      //!< the letter
-    uint64_t count : 56; //!< times occured
+    char first;
+    char second;
+    //int  count;
 
-    letter(){
-        l = 0;
-        count = 0;
+    LetterCombo(char c1, char c2)
+        :first(c1), second(c2){}
+    ~LetterCombo() {}
+
+    bool operator<(const LetterCombo& rhs) const{
+        short s1 = twoChar2Short(first, second);
+        short s2 = twoChar2Short(rhs.first, rhs.second);
+        return (s1 < s2);
     }
 
-    letter(char c){
-        l = c;
-        count = 0;
-    }
-
-    letter(char le, int c)
-        :l(le), count(c) {}
-
-    bool operator==(char c){
-        return this->l == c;
-    }
-
-    friend bool operator==(letter l1, letter l2){
-        return (l1.l == l2.l) && (l1.count == l2.count);
-    }
-
-    friend std::ostream& operator<<(std::ostream& out, letter& l){
-        out << (char)l.l << "-" << l.count;
-        return out;
+    bool operator==(const LetterCombo& r){
+        return (first == r.first) && (second == r.second);
     }
 };
 
-void printTreeStats(const tree<letter>& tr){
-    std::cerr << "Max Depth: " << tr.max_depth() << std::endl;
-    std::cerr << "Nodes: " << tr.size() << std::endl;
-    std::cerr << "Training Set Size: " << gWordTrainingSetSize << std::endl;
-}
+class WordMarkovChain {
+private:
+    int _trainingSize;
+    int _wordLengthAcc;
+    std::map<LetterCombo, uint64_t> _map;
 
-void printTree(const tree<letter>& tr){
-    if(tr.empty())
-        return;
-    tree<letter>::iterator sib = tr.begin(),
-        end = tr.end();
-    while(sib != end){
-        for(int i = 0; i < tr.depth(sib); ++i){
-            std::cout << "    ";
+    LetterCombo selectNextCombo(char c){
+        std::vector<LetterCombo> combos;
+        std::vector<uint64_t> probs;
+        auto mapIt = _map.begin();
+        while(mapIt != _map.end()){
+            if(mapIt->first.first == c){
+                combos.push_back(mapIt->first);
+                probs.push_back(mapIt->second);
+                //std::cerr << "match" << std::endl;
+            }
+            ++mapIt;
         }
-        std::cout << (*sib) << std::endl;
-        ++sib;
+        if(combos.size() <= 1){
+            return LetterCombo(0,0); // insufficent choices tell it to end gen
+        }
+        std::discrete_distribution<uint64_t> distrib(probs.begin(),probs.end());
+        uint64_t idx = distrib(gen);
+        return combos[idx];
     }
-}
-
-void trainMarkovChain(tree<letter>& tr, std::string& word){
-    gWordTrainingSetSize++;
-    tree<letter>::iterator treeIt = tr.begin(), loc;
-    for(size_t i = 0; i < word.length(); i++){
-        tree<letter>::sibling_iterator b = treeIt.begin(), e = treeIt.end();
-        loc = std::find(b, e, word[i]);
-        if(loc == treeIt.end()){
-            // insert new node
-            loc = tr.append_child(treeIt, letter(word[i]));
-            loc->count++;
-            treeIt = loc;
-        }else{
-            // increment times found count for that letter in position
-            loc->count++;
-        }
-        treeIt = loc;
+public:
+    WordMarkovChain() {
+        _trainingSize = 0;
+        _wordLengthAcc = 0;
     }
-}
 
-std::string generateFromMarkovChain(tree<letter>& tr){
-    // generator only used here but needs to maintain state between calls
-    static std::default_random_engine gen =
-        std::default_random_engine(std::chrono::system_clock::now()
-            .time_since_epoch().count()
-        );
-    std::array<int64_t, 26> probs;
-    tree<letter>::iterator treeTop = tr.begin();
-    std::string str;
-    do {
-        tree<letter>::sibling_iterator beg = treeTop.begin(),
-            end = treeTop.end();
-        // get probs
-        int idx = 0;
-        std::fill(probs.begin(), probs.end(), 0);
-        for(auto it = beg; it != end; ++it){
-            probs[it->l - 'A'] = it->count;
-            idx++;
+    ~WordMarkovChain(){}
+
+    void train(const std::string& w){
+        _trainingSize++;
+        // iterate and build list
+        int sz = w.length();
+        for(int i = 1; i < sz; i++) {
+            _map[LetterCombo(w[i - 1], w[i])]++;
         }
-        std::discrete_distribution<int> distrib(probs.begin(), probs.end());
-        // pick out the letter
-        idx = distrib(gen);
-        str += (char)(idx + 'A');
-        treeTop = std::find(beg, end, letter(idx + 'A', probs[idx]));
-        if(treeTop == tr.end()){
-            std::cerr << "Early Exixt because end" << std::endl;
-            return str;
+        _wordLengthAcc += sz;
+        //std::cerr << _map.size() << std::endl;
+    }
+
+    LetterCombo getRandomCombo(){
+        std::map<LetterCombo, uint64_t>::iterator it = _map.begin();
+        std::advance(it, randomZeroToN(_map.size()));
+        return it->first;
+    }
+
+    std::string generate(){
+        int sz = _wordLengthAcc / _trainingSize;
+        std::string str;
+        LetterCombo c = this->getRandomCombo();
+        str += c.first;
+        for(int i = 1; i < sz; i++){
+            c = this->selectNextCombo(c.second);
+            if(c == LetterCombo(0, 0)){
+                return str;
+            }
+            str += c.first;
         }
-    } while(tr.max_depth(treeTop));
-    return str;
-}
+        return str;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out,
+            const WordMarkovChain& c){
+        out << "Trained on: " << c._trainingSize << " words" << std::endl;
+        out << "Characters: " << c._wordLengthAcc << std::endl;
+        out << "AvgWordLen: " << c._wordLengthAcc / c._trainingSize
+            << std::endl;
+        out << "Keys: " << c._map.size() << std::endl;
+        return out;
+    }
+};
 
 /**************************************
 *   Program Entry Point               *
@@ -124,20 +132,12 @@ int main(int argc, char** argv){
         return 0;
     }
 
-    // create the tree for the markov chain
-    tree<letter> tr;
-    // insert the root node of the chain
-    // required so that child nodes can be appended to it
-    tree<letter>::iterator treeTop = tr.insert(tr.begin(), letter(0));
-
+    WordMarkovChain chain;
     // begin training of the markov chain
     std::string word;
     while(infile >> word){
-        trainMarkovChain(tr, word);
+        chain.train(word);
     }
-    //printTree(tr);
-    printTreeStats(tr);
-    for(int i = 0; i < 100; i++){
-        std::cout << generateFromMarkovChain(tr) << std::endl;
-    }
+    std::cerr << chain << std::endl;
+    std::cout << chain.generate() << std::endl;
 }
