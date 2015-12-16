@@ -4,3 +4,5 @@ preprocd.txt
 # C++ build products
 markov
 
+# Build Products from the visualizer
+test/*
