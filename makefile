@@ -12,7 +12,10 @@ clean:
 	rm -f $(PROCDDATAFILE)
 
 $(EXE): $(SRC)
-	g++ $(CXX_FLAGS) $^ -o $@
+	g++ $(CXX_FLAGS) $< -o $@
 
 $(PROCDDATAFILE): $(INPUTDATA)
 	$(DATAPREPROCESSOR) $^ > $@
+
+# File Deps Graph
+$(EXE): MarkovLib.hh

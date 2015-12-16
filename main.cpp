@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-//#include "MarkovLib.hh"
+#include "MarkovLib.hh"
 #include "tree.hh"
 
 class SentenceMarkovChain {
@@ -30,10 +30,10 @@ public:
         std::stringstream ss(sent);
         std::string str;
         while(ss >> str){
-            
+
         }
     }
-    
+
     friend std::ostream& operator<<(std::ostream& out,
             const SentenceMarkovChain& c){
         out << "SentencesTrainingSet: " << c._trainSetSize << std::endl;
@@ -47,13 +47,13 @@ public:
 *   Program Entry Point               *
 **************************************/
 int main(int argc, char** argv){
-    std::ifstream infile("./data/aligned.simple");
+    std::ifstream infile("/home/hschmale/MarkovChain/preprocd.txt");
     if(!infile.is_open()){
         std::cout << "Failed to open training data" << std::endl;
         return 0;
     }
 
-    SentenceMarkovChain chain;
+    WordMarkovChain chain;
     // begin training of the markov chain
     std::string line;
     while(getline(infile, line)){
@@ -61,5 +61,6 @@ int main(int argc, char** argv){
     }
     infile.close();
     std::cerr << chain << std::endl;
+    chain.printProbsGraph(std::cout);
     //std::cout << chain.generate() << std::endl;
 }

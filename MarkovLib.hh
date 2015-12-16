@@ -1,5 +1,5 @@
-#ifndef MARKOV_LIB_H_INC
-#define MARKOVTREE_H_INC
+#ifndef MARKOV_LIB_HH_INC
+#define MARKOV_LIB_HH_INC
 
 #include <vector>
 #include <random>
@@ -8,6 +8,7 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <iomanip>
 
 static std::default_random_engine gen =
     std::default_random_engine(std::chrono::system_clock::now()
@@ -28,7 +29,6 @@ class LetterCombo {
 public:
     char first;
     char second;
-    //int  count;
 
     LetterCombo(char c1, char c2)
         :first(c1), second(c2){}
@@ -59,7 +59,6 @@ private:
             if(mapIt->first.first == c){
                 combos.push_back(mapIt->first);
                 probs.push_back(mapIt->second);
-                //std::cerr << "match" << std::endl;
             }
             ++mapIt;
         }
@@ -69,6 +68,31 @@ private:
         std::discrete_distribution<uint64_t> distrib(probs.begin(),probs.end());
         uint64_t idx = distrib(gen);
         return combos[idx];
+    }
+
+    void printLetterProbs(char c, std::ostream& out){
+        std::vector<LetterCombo> combos;
+        std::vector<uint64_t> probs;
+        auto mapIt = _map.begin();
+        while(mapIt != _map.end()){
+            if(mapIt->first.first == c){
+                combos.push_back(mapIt->first);
+                probs.push_back(mapIt->second);
+            }
+            ++mapIt;
+        }
+        uint64_t acc = 0; // accumlater
+        for(uint64_t i : probs){
+            acc += i;
+        }
+        // print it out
+        for(size_t i = 0; i < combos.size(); i++){
+            double per = (double)probs[i]/(double)acc;
+            if(per > .01){
+                out << c << ',' << combos[i].second << ','
+                    << std::setprecision(2) << per << std::endl;
+            }
+        }
     }
 public:
     WordMarkovChain() {
@@ -110,15 +134,25 @@ public:
         return str;
     }
 
+    void printProbsGraph(std::ostream& out);
+
     friend std::ostream& operator<<(std::ostream& out,
-            const WordMarkovChain& c){
-        out << "Trained on: " << c._trainingSize << " words" << std::endl;
-        out << "Characters: " << c._wordLengthAcc << std::endl;
-        out << "AvgWordLen: " << c._wordLengthAcc / c._trainingSize
-            << std::endl;
-        out << "Prob Keys : " << c._map.size() << std::endl;
-        return out;
-    }
+            const WordMarkovChain& c);
 };
 
-#endif //MARKOVTREE_H_INC
+void WordMarkovChain::printProbsGraph(std::ostream& out){
+    for(char c = 'A'; c <= 'Z'; c++){
+        this->printLetterProbs(c, out);
+    }
+}
+
+std::ostream& operator<<(std::ostream& out, const WordMarkovChain& c){
+    out << "Trained on: " << c._trainingSize << " words" << std::endl;
+    out << "Characters: " << c._wordLengthAcc << std::endl;
+    out << "AvgWordLen: " << c._wordLengthAcc / c._trainingSize
+        << std::endl;
+    out << "Prob Keys : " << c._map.size() << std::endl;
+    return out;
+}
+
+#endif //MARKOV_LIB_HH_INC
