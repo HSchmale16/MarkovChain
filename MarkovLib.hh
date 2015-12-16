@@ -88,7 +88,7 @@ private:
         // print it out
         for(size_t i = 0; i < combos.size(); i++){
             double per = (double)probs[i]/(double)acc;
-            if(per > .01){
+            if(per > .05){
                 out << c << ',' << combos[i].second << ','
                     << std::setprecision(2) << per << std::endl;
             }
