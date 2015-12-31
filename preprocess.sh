@@ -35,7 +35,7 @@ function filter-delete-short-words() {
 
 cat $@ | \
     filter-delete-comments | \
-    filter-ucase | \
+    # filter-ucase | \
     filter-rm-nonalphabet | \
     filter-spaces-2-newline | \
     filter-rm-blank-lines | \

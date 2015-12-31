@@ -62,14 +62,14 @@ private:
             }
             ++mapIt;
         }
-        if(combos.size() <= 1){
-            return LetterCombo(0,0); // insufficent choices tell it to end gen
-        }
         std::discrete_distribution<uint64_t> distrib(probs.begin(),probs.end());
         uint64_t idx = distrib(gen);
         return combos[idx];
     }
 
+    /**\brief Prints the probability of a certain letter transforming into
+     * another letter.
+     */
     void printLetterProbs(char c, std::ostream& out){
         std::vector<LetterCombo> combos;
         std::vector<uint64_t> probs;
@@ -107,6 +107,7 @@ public:
         for(int i = 1; i < sz; i++) {
             _map[LetterCombo(w[i - 1], w[i])]++;
         }
+        _map[LetterCombo(w[w.length() - 1], 0)]++;
         _wordLengthAcc += sz;
         //std::cerr << _map.size() << std::endl;
     }
@@ -118,16 +119,15 @@ public:
     }
 
     std::string generate(){
-        int sz = _wordLengthAcc / _trainingSize;
         std::string str;
         LetterCombo c = this->getRandomCombo();
         str += c.first;
-        for(int i = 1; i < sz; i++){
+        for(;;){
             c = this->selectNextCombo(c.second);
-            if(c == LetterCombo(0, 0)){
+            str += c.first;
+            if(c.second == 0){
                 return str;
             }
-            str += c.first;
         }
         return str;
     }
