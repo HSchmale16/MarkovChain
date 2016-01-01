@@ -47,8 +47,11 @@ public:
 
 class WordMarkovChain {
 private:
+    /// The number of words this markov chain has been trained on.
     int _trainingSize;
+    /// The number of bytes that have been used to train this chain.
     int _wordLengthAcc;
+    /// Contains the probabilities of the machine going to another state
     std::map<LetterCombo, uint64_t> _map;
 
     LetterCombo selectNextCombo(char c){
@@ -69,6 +72,8 @@ private:
 
     /**\brief Prints the probability of a certain letter transforming into
      * another letter.
+     * \param c the letter value to select from.
+     * \param out The stream to write to
      */
     void printLetterProbs(char c, std::ostream& out){
         std::vector<LetterCombo> combos;
@@ -100,6 +105,8 @@ public:
 
     ~WordMarkovChain(){}
 
+    /**\brief Train the chain from a word
+     */
     void train(const std::string& w){
         _trainingSize++;
         // iterate and build list
@@ -118,6 +125,9 @@ public:
         return it->first;
     }
 
+    /**\brief Generates a word from the internal chain.
+     * \return A string of the word being generated.
+     */
     std::string generate(){
         std::string str;
         LetterCombo c = this->getRandomCombo();
