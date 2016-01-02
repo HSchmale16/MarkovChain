@@ -1,4 +1,4 @@
-SRC := main.cpp
+SRC := main2.cpp
 EXE := markov
 CXX_FLAGS := -Wall -std=c++11 -O2
 INPUTDATA := \
@@ -18,4 +18,4 @@ $(PROCDDATAFILE): $(INPUTDATA)
 	$(DATAPREPROCESSOR) $^ > $@
 
 # File Deps Graph
-$(EXE): MarkovLib.hh
+$(EXE): GenericMarkov.hh

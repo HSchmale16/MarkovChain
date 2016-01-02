@@ -4,6 +4,7 @@ words.list
 
 # C++ build products
 markov
+*.out
 
 # Build Products from the visualizer
 test/*
