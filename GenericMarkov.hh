@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 
-template<typename T>
+template<class T>
 class Markov {
 private:
     std::map<std::pair<T, T>, uint64_t> _chain;
@@ -12,12 +12,16 @@ public:
     Markov(){}
     virtual ~Markov(){}
 
-    void increaseStateWeight(std::pair<T, T> state, uint64_t value){
+    inline void increaseStateWeight(std::pair<T, T> state, uint64_t value){
         _chain[state] += value;
     }
 
-    void reduceStateWeight(std::pair<T, T> state, uint64_t value){
+    inline void reduceStateWeight(std::pair<T, T> state, uint64_t value){
         _chain[state] -= value;
+    }
+
+    inline void setStateWeight(std::pair<T, T> state, uint64_t value){
+        _chain[state] = value;
     }
 
     void printStateList(std::ostream& out){

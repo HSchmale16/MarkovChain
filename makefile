@@ -6,7 +6,7 @@ INPUTDATA := \
 PROCDDATAFILE := preprocd.txt
 DATAPREPROCESSOR := ./preprocess.sh
 
-all: $(EXE) $(PROCDDATAFILE)
+all: $(EXE) 
 clean:
 	rm -f $(EXE)
 	rm -f $(PROCDDATAFILE)

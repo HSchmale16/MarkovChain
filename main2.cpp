@@ -3,28 +3,66 @@
 #include <ctime>
 #include <random>
 #include <array>
+#include <sstream>
+#include <functional>
 #include "GenericMarkov.hh"
 
-typedef std::pair<char, char> CPair;
-
-char getRndLetter() {
-    static std::default_random_engine generator;
-    static std::array<char, 4> intervals {'A', 'Z', 'a', 'z'};
-    static std::array<double, 3> weights {1.0, 0.0, 1.0};
-    static std::piecewise_constant_distribution<float>
-        distribution(intervals.begin(), intervals.end(), weights.begin());
-    return (char)distribution(generator);
-}
+class TestState {
+public:
+    int a;
+    int b;
+    int c;
     
+    TestState(int _a, int _b, int _c)
+        : a(_a), b(_b), c(_c) {}
+    
+    ~TestState(){}
+
+    std::string toString()const{
+        std::stringstream s;
+        s << this->a << ":" << b << ":" << c;
+        return s.str();
+    }
+
+    uint64_t hashSelf()const{
+        return (a * 9576890767 + b) * 1500450271 + c;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const TestState& s);
+
+    bool operator==(TestState t){
+        return (a == t.a) && (b == t.b) && (c == t.c);
+    }
+
+    bool operator<(const TestState& t)const{
+        return this->hashSelf() < t.hashSelf();
+    }
+};
+
+std::ostream& operator<<(std::ostream& out, const TestState& s){
+    out << s.toString();
+    return out;
+}
+
+// begin actual code
+typedef std::pair<TestState, TestState> CPair;
+
+int rnd(){
+    return rand() % 10;
+}
+
+TestState getRndState(){
+    return TestState(rnd(), rnd(), rnd());
+}
+
+CPair getRndPair(){
+    return CPair(getRndState(), getRndState());
+}
+
 int main(int argc, char** argv){
-    srand(time(NULL));
-    Markov<char> m;
-    for(int i = 0; i < 100; i++){
-        m.increaseStateWeight(CPair(getRndLetter(), getRndLetter()),
-            rand() % 100);
+    Markov<TestState> m;
+    for(int i = 0; i < 1000000; i++){
+        m.increaseStateWeight(getRndPair(), rand() % 100);
     }
     m.printStateList(std::cout);
-    m.printStats(std::cout);
-    std::cout << sizeof(CPair) << std::endl;
-    std::cout << sizeof m << std::endl;
 }
